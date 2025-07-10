@@ -22,9 +22,9 @@ const Hero = () => {
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-24 lg:pt-28">
-        <div className="flex flex-col lg:flex-row items-center lg:items-start lg:justify-center lg:gap-12">
+        <div className="flex flex-col lg:flex-row items-start gap-6 lg:gap-12">
           {/* Robot Image - Now aligned to the left on desktop */}
-          <div className="relative mb-6 sm:mb-8 lg:mb-0 lg:flex-shrink-0">
+          <div className="relative flex-shrink-0">
             <img 
               src="/ChatGPT Image 30 may 2025, 18_43_53.png" 
               alt="Kacum AI Mascot" 
