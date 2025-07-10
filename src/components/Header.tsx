@@ -65,7 +65,7 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
                 }`}
               >
                 <LogIn className="w-4 h-4" />
-                <span>Área Privada</span>
+                <span>Acceso Demos</span>
               </button>
             )}
           </nav>
@@ -102,7 +102,7 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
                 className="flex items-center space-x-2 w-full px-4 py-2 text-blue-600 hover:bg-blue-50"
               >
                 <LogIn className="w-4 h-4" />
-                <span>Área Privada</span>
+                <span>Acceso Demos</span>
               </button>
             )}
           </div>

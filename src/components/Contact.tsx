@@ -32,7 +32,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <div className="text-white font-semibold">Email</div>
-                    <div className="text-gray-300">contacto@kacum.ai</div>
+                    <div className="text-gray-300">kacumapp@gmail.com</div>
                   </div>
                 </div>
 
@@ -42,7 +42,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <div className="text-white font-semibold">Teléfono</div>
-                    <div className="text-gray-300">+34 900 123 456</div>
+                    <div className="text-gray-300">+34 631 846 751</div>
                   </div>
                 </div>
 
@@ -52,7 +52,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <div className="text-white font-semibold">Ubicación</div>
-                    <div className="text-gray-300">Madrid, España</div>
+                    <div className="text-gray-300">Murcia, España</div>
                   </div>
                 </div>
 
@@ -62,14 +62,14 @@ const Contact = () => {
                   </div>
                   <div>
                     <div className="text-white font-semibold">Horario</div>
-                    <div className="text-gray-300">Lun - Vie: 9:00 - 18:00</div>
-                  </div>
+                    <div className="text-gray-300">Lun - Vie: 17:00 - 21:00</div>
+                  </div> 
                 </div>
               </div>
             </div>
 
             <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 backdrop-blur-md rounded-2xl p-6 border border-blue-400/30">
-              <h4 className="text-xl font-bold text-white mb-4">¿Por qué elegir Kacum?</h4>
+              <h4 className="text-xl font-bold text-white mb-4">¿Por qué elegir Kacum.com?</h4>
               <ul className="space-y-3 text-gray-300">
                 <li className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-cyan-400 rounded-full"></div>
