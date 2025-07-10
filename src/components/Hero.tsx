@@ -48,8 +48,8 @@ const Hero = () => {
             </h1>
 
             <p className="text-lg sm:text-xl md:text-2xl text-gray-300 mb-6 sm:mb-8 leading-relaxed">
-              Desarrollamos CRM, SaaS y aplicaciones personalizadas con inteligencia artificial 
-              que revolucionan tu negocio y automatizan tus procesos.
+            Desarrollamos CRM, SaaS y soluciones a medida potenciadas con IA.
+            Aplicamos inteligencia artificial para automatizar procesos, predecir resultados y transformar la forma en que tu empresa opera.
             </p>
           </div>
         </div>
@@ -75,9 +75,9 @@ const Hero = () => {
 
         <div className="mt-12 sm:mt-16 grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 max-w-4xl mx-auto px-4">
           {[
-            { number: '50+', label: 'Proyectos Completados' },
-            { number: '98%', label: 'Satisfacción Cliente' },
-            { number: '24/7', label: 'Soporte Técnico' }
+            { number: '50+', label: 'Sectores Potenciados' },
+            { number: '50+', label: 'Industrias beneficiadas' },
+            { number: '75%', label: 'Ahorro en tiempo' }
           ].map((stat, index) => (
             <div key={index} className="text-center p-4 bg-white/5 rounded-xl backdrop-blur-sm">
               <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1 sm:mb-2">

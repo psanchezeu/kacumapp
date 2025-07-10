@@ -1,4 +1,3 @@
-import React from 'react';
 import { Mail, Phone, MapPin } from 'lucide-react';
 
 const Footer = () => {
@@ -19,7 +18,8 @@ const Footer = () => {
             </div>
             <p className="text-gray-400 mb-6 max-w-md text-sm sm:text-base">
               Transformamos ideas en aplicaciones inteligentes que revolucionan negocios. 
-              Especialistas en IA, CRM, SaaS y automatización empresarial.
+              Especialistas en CRM, SaaS, ERP, IA y automatización empresarial. 
+              Soluciones por Industria, Aplicaciones para tu Sector.
             </p>
             <div className="flex flex-wrap gap-4">
               <a 

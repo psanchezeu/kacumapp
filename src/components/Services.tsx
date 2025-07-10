@@ -1,4 +1,3 @@
-import React from 'react';
 import { Database, Zap, Bot, Cog, BarChart3, Shield } from 'lucide-react';
 
 const Services = () => {
@@ -7,7 +6,7 @@ const Services = () => {
       icon: Database,
       title: 'CRM Inteligente',
       description: 'Sistemas de gestión de clientes con IA que predicen comportamientos y automatizan seguimientos.',
-      features: ['Automatización de ventas', 'Análisis predictivo', 'Integración omnicanal']
+      features: ['Automatización de ventas', 'Análisis predictivo', 'Integración omnicanal','Aplicable a salud, eventos, talleres, educación...','Integración omnicanal']
     },
     {
       icon: Zap,
