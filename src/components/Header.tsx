@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X, Bot, LogIn } from 'lucide-react';
 
-interface HeaderProps {
-  onLoginClick?: () => void;
-}
-
-const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
+const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -55,19 +51,19 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
               </button>
             ))}
             
-            {onLoginClick && (
-              <button
-                onClick={onLoginClick}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
-                  isScrolled 
-                    ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:from-blue-600 hover:to-cyan-600' 
-                    : 'bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm'
-                }`}
-              >
-                <LogIn className="w-4 h-4" />
-                <span>Acceso Demos</span>
-              </button>
-            )}
+            <a
+              href="https://demos.kacum.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
+                isScrolled 
+                  ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:from-blue-600 hover:to-cyan-600' 
+                  : 'bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm'
+              }`}
+            >
+              <LogIn className="w-4 h-4" />
+              <span>Acceso Demos</span>
+            </a>
           </nav>
 
           <button
@@ -93,18 +89,16 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
                 {item}
               </button>
             ))}
-            {onLoginClick && (
-              <button
-                onClick={() => {
-                  onLoginClick();
-                  setIsMenuOpen(false);
-                }}
-                className="flex items-center space-x-2 w-full px-4 py-2 text-blue-600 hover:bg-blue-50"
-              >
-                <LogIn className="w-4 h-4" />
-                <span>Acceso Demos</span>
-              </button>
-            )}
+            <a
+              href="https://demos.kacum.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center space-x-2 w-full px-4 py-2 text-blue-600 hover:bg-blue-50"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <LogIn className="w-4 h-4" />
+              <span>Acceso Demos</span>
+            </a>
           </div>
         )}
       </div>
