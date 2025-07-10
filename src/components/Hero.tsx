@@ -1,6 +1,4 @@
-import React from 'react';
 import { ArrowRight, Sparkles } from 'lucide-react';
-import { useEffect } from 'react';
 
 const Hero = () => {
   const scrollToContact = () => {
@@ -23,34 +21,38 @@ const Hero = () => {
         <div className="absolute bottom-1/4 right-1/4 w-48 h-48 sm:w-96 sm:h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center w-full">
-        <div className="flex justify-center mb-6 sm:mb-8">
-          <div className="relative">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-24 lg:pt-28">
+        <div className="flex flex-col lg:flex-row items-center lg:items-start lg:justify-center lg:gap-12">
+          {/* Robot Image - Now aligned to the left on desktop */}
+          <div className="relative mb-6 sm:mb-8 lg:mb-0 lg:flex-shrink-0">
             <img 
               src="/ChatGPT Image 30 may 2025, 18_43_53.png" 
               alt="Kacum AI Mascot" 
-              className="w-24 h-24 sm:w-32 sm:h-32 object-contain drop-shadow-2xl"
-              width={128}
-              height={128}
+              className="w-24 h-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 xl:w-48 xl:h-48 object-contain drop-shadow-2xl"
+              width={288}
+              height={288}
               loading="eager"
             />
             <div className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2">
               <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-400 animate-pulse" />
             </div>
           </div>
+
+          {/* Title and Description - Now takes remaining space on desktop */}
+          <div className="text-center lg:text-left max-w-3xl">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-6xl xl:text-7xl font-bold text-white mb-4 sm:mb-6 leading-tight">
+              Transformamos Ideas en&nbsp;
+              <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                Aplicaciones IA
+              </span>
+            </h1>
+
+            <p className="text-lg sm:text-xl md:text-2xl text-gray-300 mb-6 sm:mb-8 leading-relaxed">
+              Desarrollamos CRM, SaaS y aplicaciones personalizadas con inteligencia artificial 
+              que revolucionan tu negocio y automatizan tus procesos.
+            </p>
+          </div>
         </div>
-
-        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-4 sm:mb-6 leading-tight px-2">
-          Transformamos Ideas en
-          <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent block">
-            Aplicaciones IA
-          </span>
-        </h1>
-
-        <p className="text-lg sm:text-xl md:text-2xl text-gray-300 mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed px-4">
-          Desarrollamos CRM, SaaS y aplicaciones personalizadas con inteligencia artificial 
-          que revolucionan tu negocio y automatizan tus procesos.
-        </p>
 
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center px-4">
           <button
