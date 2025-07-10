@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, Bot, LogIn } from 'lucide-react';
+import { Menu, X, LogIn } from 'lucide-react';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -28,14 +28,21 @@ const Header: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl flex items-center justify-center">
-              <Bot className="w-6 h-6 text-white" />
+            <div className="h-10 w-auto">
+              {/* Logo para fondo oscuro (header transparente) */}
+              <img 
+                src="/logos/logo-light.svg" 
+                alt="Kacum Logo" 
+                className={`h-full w-auto transition-opacity duration-300 ${isScrolled ? 'opacity-0 h-0 w-0' : 'opacity-100'}`}
+              />
+              
+              {/* Logo para fondo claro (header con scroll) */}
+              <img 
+                src="/logos/logo-dark.svg" 
+                alt="Kacum Logo" 
+                className={`h-full w-auto transition-opacity duration-300 ${isScrolled ? 'opacity-100' : 'opacity-0 h-0 w-0'}`}
+              />
             </div>
-            <span className={`text-2xl font-bold transition-colors ${
-              isScrolled ? 'text-gray-900' : 'text-white'
-            }`}>
-              Kacum
-            </span>
           </div>
 
           <nav className="hidden md:flex items-center space-x-8">
