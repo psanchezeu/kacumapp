@@ -1,5 +1,18 @@
 # nixpacks.toml
-# Forzar el comando de inicio para que ejecute el backend de Node.js
+# Configuración explícita para un monorepo Node.js + React en Coolify
 
+# 1. Definir los proveedores a utilizar. Solo Node.js.
+providers = ["node"]
+
+# 2. Fase de instalación: Instalar dependencias para ambos workspaces.
+[phases.install]
+cmds = ["npm install"]
+
+# 3. Fase de construcción: Construir la aplicación de frontend.
+[phases.build]
+cmds = ["npm run build"]
+
+# 4. Fase de inicio: Iniciar el servidor de backend.
+# Esto anula la configuración por defecto de Caddy/servidor estático.
 [start]
 cmd = "npm start"
