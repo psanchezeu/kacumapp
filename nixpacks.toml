@@ -1,18 +1,18 @@
-# nixpacks.toml
-# Configuración explícita para un monorepo Node.js + React en Coolify
+# nixpacks.toml - Configuración para Monorepo (Backend + Frontend)
 
-# 1. Definir los proveedores a utilizar. Solo Node.js.
+# Forzar el uso del proveedor de Node.js para evitar la detección de sitio estático.
 providers = ["node"]
 
-# 2. Fase de instalación: Instalar dependencias para ambos workspaces.
 [phases.install]
+# Instala dependencias en la raíz, el script 'postinstall' se encargará del backend.
 cmds = ["npm install"]
 
-# 3. Fase de construcción: Construir la aplicación de frontend.
 [phases.build]
-cmds = ["npm run build"]
+# 1. Generar el cliente de Prisma (esencial para el backend).
+# 2. Construir el frontend estático que servirá el backend.
+cmds = ["npx prisma generate --schema=./backend/prisma/schema.prisma", "npm run build:frontend"]
 
-# 4. Fase de inicio: Iniciar el servidor de backend.
-# Esto anula la configuración por defecto de Caddy/servidor estático.
 [start]
+# Comando para iniciar el servidor de backend. El 'package.json' ya hace 'cd backend'.
 cmd = "npm start"
+
