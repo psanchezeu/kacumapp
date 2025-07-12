@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -8,29 +8,20 @@ import Process from './components/Process';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 import LoginForm from './components/auth/LoginForm';
+
+import AuthCallback from './components/auth/AuthCallback';
 import DashboardLayout from './components/dashboard/DashboardLayout';
 
-const PublicApp = () => {
-  const [showLogin, setShowLogin] = useState(false);
-  const { user } = useAuth();
-
-  if (user) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  if (showLogin) {
-    return (
-      <LoginForm onSuccess={() => setShowLogin(false)} />
-    );
-  }
-
+const PublicLayout = () => {
   return (
-    <div className="min-h-screen">
-      <Header onLoginClick={() => setShowLogin(true)} />
-      <Hero />
-      <Services />
-      <Process />
-      <Contact />
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main className="flex-grow">
+        <Hero />
+        <Services />
+        <Process />
+        <Contact />
+      </main>
       <Footer />
     </div>
   );
@@ -48,10 +39,27 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (!user) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/login" state={{ from: window.location.pathname }} replace />;
   }
 
   return <>{children}</>;
+};
+
+const LoginPage = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <LoginForm onSuccess={() => navigate('/dashboard')} />
+      </div>
+    </div>
+  );
 };
 
 function App() {
@@ -59,9 +67,11 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<PublicApp />} />
+          <Route path="/" element={<PublicLayout />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route 
-            path="/dashboard" 
+            path="/dashboard/*" 
             element={
               <ProtectedRoute>
                 <DashboardLayout />

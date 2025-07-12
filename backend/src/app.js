@@ -1,19 +1,67 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const nodemailer = require('nodemailer');
-const swaggerJsdoc = require('swagger-jsdoc');
-const swaggerUi = require('swagger-ui-express');
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+import nodemailer from 'nodemailer';
+import swaggerJsdoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
+import session from 'express-session';
+import passport from 'passport';
+import cookieParser from 'cookie-parser';
+
+// Configuraciones
+import './config/passport.js';
+
+// Rutas
+import authRoutes from './routes/auth.js';
+import userRoutes from './routes/user.js';
 
 const app = express();
 const port = process.env.PORT || 3001;
 
 // Middleware
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',').map(origin => origin.trim());
+
+// Configuración de CORS
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS?.split(','),
-  credentials: true
+  origin: function (origin, callback) {
+    // Permitir solicitudes sin 'origin' (como aplicaciones móviles o curl)
+    if (!origin) return callback(null, true);
+    
+    // Verificar si el origen está permitido
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'El origen de la petición no está permitido por CORS';
+      console.error(msg, { origin, allowedOrigins });
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 }));
+
+// Manejar solicitudes OPTIONS (necesario para CORS preflight)
+app.options('*', cors());
+
+// Parsear JSON y cookies
 app.use(express.json());
+app.use(cookieParser());
+
+// Configuración de la sesión de Express
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: process.env.NODE_ENV === 'production' },
+  })
+);
+
+// Inicializar Passport
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Configuración de Swagger
 const swaggerOptions = {
@@ -85,6 +133,10 @@ app.get('/', (req, res) => {
  *       500:
  *         description: Error al enviar el correo
  */
+// Rutas de la API
+app.use('/auth', authRoutes);
+app.use('/api', userRoutes);
+
 app.post('/api/contact', async (req, res) => {
   try {
     const { name, email, phone, message } = req.body;
@@ -130,4 +182,4 @@ app.listen(port, () => {
   console.log(`Documentación de la API disponible en http://localhost:${port}/api-docs`);
 });
 
-module.exports = app;
+export default app;
