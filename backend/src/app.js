@@ -98,11 +98,6 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Ruta de prueba
-app.get('/', (req, res) => {
-  res.json({ message: 'API de Kacum funcionando correctamente' });
-});
-
 // Ruta para enviar correo
 /**
  * @swagger
@@ -138,6 +133,20 @@ app.get('/', (req, res) => {
 // Rutas de la API
 app.use('/auth', authRoutes);
 app.use('/api', userRoutes);
+
+// Servir frontend en producción ANTES de las rutas catch-all
+if (process.env.NODE_ENV === 'production') {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+
+    // Servir archivos estáticos del build de React
+    app.use(express.static(path.join(__dirname, '../../dist')));
+
+    // Para cualquier otra ruta no definida en la API, servir el index.html de React
+    app.get('*', (req, res) => {
+        res.sendFile(path.resolve(__dirname, '../../dist', 'index.html'));
+    });
+}
 
 app.post('/api/contact', async (req, res) => {
   try {
@@ -178,19 +187,7 @@ app.post('/api/contact', async (req, res) => {
   }
 });
 
-// Servir frontend en producción
-if (process.env.NODE_ENV === 'production') {
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = path.dirname(__filename);
 
-    // Servir archivos estáticos del build de React que están en la raíz del proyecto
-    app.use(express.static(path.join(__dirname, '../../dist')));
-
-    // Para cualquier otra ruta no definida en la API, servir el index.html de React
-    app.get('*', (req, res) => {
-        res.sendFile(path.resolve(__dirname, '../../dist', 'index.html'));
-    });
-}
 
 // Iniciar el servidor
 app.listen(port, () => {
