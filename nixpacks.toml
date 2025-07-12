@@ -1,18 +1,14 @@
-# nixpacks.toml - Configuración para Monorepo (Backend + Frontend)
-
-# Forzar el uso del proveedor de Node.js para evitar la detección de sitio estático.
-providers = ["node"]
+# Configuración de Nixpacks para un despliegue full-stack
 
 [phases.install]
-# Instala dependencias en la raíz, el script 'postinstall' se encargará del backend.
-cmds = ["npm install"]
+# Instala dependencias en la raíz (frontend) y en la carpeta del backend
+cmds = ["npm install", "cd backend && npm install"]
 
 [phases.build]
-# 1. Generar el cliente de Prisma (esencial para el backend).
-# 2. Construir el frontend estático que servirá el backend.
-cmds = ["npx prisma generate --schema=./backend/prisma/schema.prisma", "npm run build:frontend"]
+# Construye la aplicación de React
+cmds = ["npm run build"]
 
 [start]
-# Comando para iniciar el servidor de backend. El 'package.json' ya hace 'cd backend'.
-cmd = "npm start"
-
+# Comando para iniciar el servidor de Node.js
+# Este será el proceso principal del contenedor
+cmd = "cd backend && npm start"

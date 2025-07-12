@@ -5,13 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run build:frontend && npm run build:backend",
+    "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "build:frontend": "vite build",
-    "build:backend": "cd backend && npm install --only=production",
-    "start": "cd backend && npm start",
-    "postinstall": "npm install --prefix backend"
+    "preview": "vite preview"
   },
   "dependencies": {
     "axios": "^1.10.0",
