@@ -7,6 +7,8 @@ import swaggerUi from 'swagger-ui-express';
 import session from 'express-session';
 import passport from 'passport';
 import cookieParser from 'cookie-parser';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 // Configuraciones
 import './config/passport.js';
@@ -175,6 +177,20 @@ app.post('/api/contact', async (req, res) => {
     });
   }
 });
+
+// Servir frontend en producción
+if (process.env.NODE_ENV === 'production') {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+
+    // Servir archivos estáticos del build de React que están en la raíz del proyecto
+    app.use(express.static(path.join(__dirname, '../../dist')));
+
+    // Para cualquier otra ruta no definida en la API, servir el index.html de React
+    app.get('*', (req, res) => {
+        res.sendFile(path.resolve(__dirname, '../../dist', 'index.html'));
+    });
+}
 
 // Iniciar el servidor
 app.listen(port, () => {
