@@ -98,10 +98,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Ruta de prueba
-app.get('/', (req, res) => {
-  res.json({ message: 'API de Kacum funcionando correctamente' });
-});
+
 
 // Ruta para enviar correo
 /**
