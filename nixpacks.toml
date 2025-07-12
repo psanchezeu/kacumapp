@@ -1,0 +1,5 @@
+# nixpacks.toml
+# Forzar el comando de inicio para que ejecute el backend de Node.js
+
+[start]
+cmd = "npm start"
