@@ -175,17 +175,25 @@ app.post('/api/contact', async (req, res) => {
   }
 });
 
-// Servir archivos estáticos del frontend en producción
+// Production-specific middleware to serve frontend
 if (process.env.NODE_ENV === 'production') {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
+
   const frontendDistPath = path.join(__dirname, '..', '..', 'dist');
-  
   app.use(express.static(frontendDistPath));
 
-  // Para cualquier otra ruta no reconocida por la API, servir el index.html del frontend
+  // For any other request that doesn't match a static file or an API route, serve the index.html file
   app.get('*', (req, res) => {
-    res.sendFile(path.resolve(frontendDistPath, 'index.html'));
+    // Exclude API routes from the catch-all
+    if (req.originalUrl.startsWith('/api') || req.originalUrl.startsWith('/auth')) {
+      return res.status(404).send('API route not found');
+    }
+    res.sendFile(path.join(frontendDistPath, 'index.html'), (err) => {
+      if (err) {
+        res.status(500).send(err);
+      }
+    });
   });
 }
 
