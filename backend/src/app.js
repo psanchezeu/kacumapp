@@ -20,7 +20,7 @@ const app = express();
 
 
 // Middleware
-const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',').map(origin => origin.trim());
+const allowedOrigins = [process.env.FRONTEND_URL, ...(process.env.ALLOWED_ORIGINS?.split(',').map(origin => origin.trim()) || [])];
 
 // Configuración de CORS
 app.use(cors({
@@ -82,22 +82,12 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.use('/auth', authRoutes);
 app.use('/api', apiRoutes);
 
-// --- SERVIR FRONTEND EN PRODUCCIÓN ---
-// Este bloque debe ir DESPUÉS de las rutas de la API
-if (process.env.NODE_ENV === 'production') {
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
-  const frontendDistPath = path.join(__dirname, '..', '..', 'dist');
+// El frontend ahora se despliega como un servicio separado.
 
-  // Sirve los archivos estáticos de la app de React
-  app.use(express.static(frontendDistPath));
-
-  // El manejador "catchall": para cualquier petición que no coincida con una ruta de la API o un archivo estático,
-  // envía de vuelta el archivo index.html de React.
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(frontendDistPath, 'index.html'));
-  });
-}
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`🚀 Servidor escuchando en http://localhost:${PORT}`);
+});
 
 
 
