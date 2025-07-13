@@ -1,0 +1,25 @@
+# nixpacks.toml
+
+# Indica a Nixpacks que no intente adivinar el tipo de aplicación.
+# Esta es la línea clave para evitar que Coolify inyecte Caddy y rompa las rutas del backend.
+providers = []
+
+# Define las fases del proceso de construcción y despliegue.
+[phases]
+
+# Fase de configuración: instala las herramientas necesarias en el entorno de construcción.
+[phases.setup]
+nixPkgs = ["nodejs_18", "npm-9_x"]
+
+# Fase de instalación: instala las dependencias tanto del frontend como del backend.
+[phases.install]
+cmds = ["npm install && cd backend && npm install"]
+
+# Fase de construcción: ejecuta el script para compilar el frontend de React.
+[phases.build]
+cmds = ["npm run build"]
+
+# Define el comando de inicio de la aplicación.
+[start]
+# Le dice a Coolify que el comando para arrancar el servidor está en la carpeta del backend.
+cmd = "cd backend && npm start"
