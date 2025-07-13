@@ -17,7 +17,7 @@ import authRoutes from './routes/auth.js';
 import apiRoutes from './routes/index.js'; // Usar el router consolidado
 
 const app = express();
-const port = process.env.PORT || 3001;
+
 
 // Middleware
 const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',').map(origin => origin.trim());
@@ -66,7 +66,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: `http://localhost:${port}`,
+        url: `/`,
         description: 'Servidor de desarrollo',
       },
     ],
@@ -99,10 +99,6 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-// Iniciar el servidor
-app.listen(port, () => {
-  console.log(`Servidor corriendo en http://localhost:${port}`);
-  console.log(`Documentación de la API disponible en http://localhost:${port}/api-docs`);
-});
+
 
 export default app;
