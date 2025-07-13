@@ -5,7 +5,8 @@
   "type": "module",
   "main": "src/app.js",
   "scripts": {
-    "start": "node src/app.js",
+    "prisma:deploy": "prisma migrate deploy",
+    "start": "npm run prisma:deploy && node src/app.js",
     "dev": "nodemon --exec node src/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -30,10 +31,10 @@
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.0"
+    "swagger-ui-express": "^5.0.0",
+    "prisma": "^6.11.1"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1",
-    "prisma": "^6.11.1"
+    "nodemon": "^3.0.1"
   }
 }
