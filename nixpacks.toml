@@ -1,8 +1,8 @@
 # nixpacks.toml
 
-# Indica a Nixpacks que no intente adivinar el tipo de aplicación.
-# Esta es la línea clave para evitar que Coolify inyecte Caddy y rompa las rutas del backend.
-providers = []
+# Define la imagen base para la ejecución. Al especificarla, evitamos que Nixpacks
+# trate la aplicación como estática y añada Caddy.
+runImage = "ghcr.io/railwayapp/nixpacks:ubuntu-1741046653"
 
 # Define las fases del proceso de construcción y despliegue.
 [phases]
