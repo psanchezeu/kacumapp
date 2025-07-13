@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { UIProvider } from './contexts/UIContext';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import Services from './components/Services';
@@ -65,8 +66,9 @@ const LoginPage = () => {
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <Routes>
+      <UIProvider>
+        <Router>
+          <Routes>
           <Route path="/" element={<PublicLayout />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
@@ -81,6 +83,7 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
+      </UIProvider>
     </AuthProvider>
   );
 }

@@ -2,10 +2,14 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'admin' | 'client';
+  role: 'admin' | 'client' | 'user';
   company?: string;
   phone?: string;
   avatar?: string;
+  avatarUrl?: string;
+  darkMode?: boolean;
+  collapseMenu?: boolean;
+  language?: string;
   createdAt: string;
   lastLogin?: string;
 }

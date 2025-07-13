@@ -14,12 +14,30 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  googleId  String?  @unique
-  email     String   @unique
-  name      String
-  password  String?
-  avatarUrl String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @default(cuid())
+  googleId     String?  @unique
+  email        String   @unique
+  name         String
+  password     String?
+  avatarUrl    String?
+  role         String   @default("user") 
+  darkMode     Boolean  @default(false)
+  collapseMenu Boolean  @default(false)
+  language     String   @default("es")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  userSettings UserSettings?
+}
+
+model UserSettings {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notificationsEnabled Boolean  @default(true)
+  emailNotifications   Boolean  @default(true)
+  theme                String   @default("system") // system, light, dark
+  accentColor          String   @default("blue")
+  fontSize             String   @default("medium") // small, medium, large
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 }
