@@ -42,13 +42,13 @@ api.interceptors.response.use(
 
 export const sendContactForm = async (data: Omit<ContactFormData, 'phone'> & { phone?: string }) => {
   try {
-    const response = await api.post('/api/contact', {
+        const response = await api.post('/api/contact', {
       name: data.name,
       email: data.email,
       phone: data.phone || '',
       message: `Empresa: ${data.company}\nTipo de Proyecto: ${data.projectType}\nPresupuesto: ${data.budget}\nPlazo: ${data.timeline}\n\nDescripción:\n${data.description}`
     });
-    return response;
+        return response.data;
   } catch (error) {
     console.error('Error al enviar el formulario de contacto:', error);
     throw error;
