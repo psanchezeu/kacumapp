@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Eye, Plus, Calendar, TrendingUp, Users } from 'lucide-react';
 import { mockProjects, mockTasks } from '../../../data/mockData';
 import { Project } from '../../../types';
@@ -9,22 +9,22 @@ const ProjectsManagement = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'planning': return 'bg-yellow-100 text-yellow-800';
-      case 'development': return 'bg-blue-100 text-blue-800';
-      case 'testing': return 'bg-purple-100 text-purple-800';
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'on_hold': return 'bg-red-100 text-red-800';
+      case 'Planning': return 'bg-yellow-100 text-yellow-800';
+            case 'Development': return 'bg-blue-100 text-blue-800';
+      case 'Testing': return 'bg-purple-100 text-purple-800';
+      case 'Completed': return 'bg-green-100 text-green-800';
+      case 'On Hold': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'planning': return 'Planificación';
-      case 'development': return 'Desarrollo';
-      case 'testing': return 'Testing';
-      case 'completed': return 'Completado';
-      case 'on_hold': return 'En Pausa';
+      case 'Planning': return 'Planificación';
+            case 'Development': return 'Desarrollo';
+      case 'Testing': return 'Testing';
+      case 'Completed': return 'Completado';
+      case 'On Hold': return 'En Pausa';
       default: return status;
     }
   };
@@ -55,11 +55,11 @@ const ProjectsManagement = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Tipo</label>
-                  <p className="text-gray-900">{project.type}</p>
+                  <p className="text-gray-900">{project.type ?? 'N/A'}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Presupuesto</label>
-                  <p className="text-gray-900">€{project.budget.toLocaleString()}</p>
+                  <p className="text-gray-900">€{(project.budget ?? 0).toLocaleString()}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Fecha Inicio</label>
@@ -97,22 +97,20 @@ const ProjectsManagement = () => {
                       </div>
                       <div className="flex items-center space-x-3">
                         <span className={`px-2 py-1 rounded text-xs font-medium ${
-                          task.status === 'completed' ? 'bg-green-100 text-green-800' :
-                          task.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
+                          task.status === 'Completed' ? 'bg-green-100 text-green-800' :
+                          task.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
                           'bg-gray-100 text-gray-800'
                         }`}>
-                          {task.status === 'completed' ? 'Completada' :
-                           task.status === 'in_progress' ? 'En Progreso' : 'Pendiente'}
+                          {task.status === 'Completed' ? 'Completada' :
+                           task.status === 'In Progress' ? 'En Progreso' : 'Pendiente'}
                         </span>
                         <span className={`px-2 py-1 rounded text-xs font-medium ${
-                          task.priority === 'urgent' ? 'bg-red-100 text-red-800' :
-                          task.priority === 'high' ? 'bg-orange-100 text-orange-800' :
-                          task.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                          task.priority === 'High' ? 'bg-red-100 text-red-800' :
+                          task.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
                           'bg-gray-100 text-gray-800'
                         }`}>
-                          {task.priority === 'urgent' ? 'Urgente' :
-                           task.priority === 'high' ? 'Alta' :
-                           task.priority === 'medium' ? 'Media' : 'Baja'}
+                          {task.priority === 'High' ? 'Alta' :
+                           task.priority === 'Medium' ? 'Media' : 'Baja'}
                         </span>
                       </div>
                     </div>
@@ -132,19 +130,19 @@ const ProjectsManagement = () => {
                   <div className="flex justify-between">
                     <span className="text-gray-600">Completadas</span>
                     <span className="font-semibold text-green-600">
-                      {projectTasks.filter(t => t.status === 'completed').length}
+                      {projectTasks.filter(t => t.status === 'Completed').length}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">En Progreso</span>
                     <span className="font-semibold text-blue-600">
-                      {projectTasks.filter(t => t.status === 'in_progress').length}
+                      {projectTasks.filter(t => t.status === 'In Progress').length}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Pendientes</span>
                     <span className="font-semibold text-gray-600">
-                      {projectTasks.filter(t => t.status === 'todo').length}
+                      {projectTasks.filter(t => t.status === 'To Do').length}
                     </span>
                   </div>
                 </div>
@@ -190,7 +188,7 @@ const ProjectsManagement = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 mb-1">Proyectos Activos</p>
-              <p className="text-3xl font-bold text-gray-900">{projects.filter(p => p.status === 'development').length}</p>
+                                          <p className="text-3xl font-bold text-gray-900">{projects.filter(p => p.status === 'Development').length}</p>
             </div>
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
               <TrendingUp className="w-6 h-6 text-white" />
@@ -202,7 +200,7 @@ const ProjectsManagement = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 mb-1">Proyectos Completados</p>
-              <p className="text-3xl font-bold text-gray-900">{projects.filter(p => p.status === 'completed').length}</p>
+                            <p className="text-3xl font-bold text-gray-900">{projects.filter(p => p.status === 'Completed').length}</p>
             </div>
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
               <Calendar className="w-6 h-6 text-white" />
@@ -214,7 +212,7 @@ const ProjectsManagement = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 mb-1">Clientes Activos</p>
-              <p className="text-3xl font-bold text-gray-900">{new Set(projects.map(p => p.clientId)).size}</p>
+                            <p className="text-3xl font-bold text-gray-900">{new Set(projects.map(p => p.clientName)).size}</p>
             </div>
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
               <Users className="w-6 h-6 text-white" />
@@ -245,7 +243,7 @@ const ProjectsManagement = () => {
                       <p className="text-sm text-gray-600">{project.description.substring(0, 50)}...</p>
                     </div>
                   </td>
-                  <td className="py-4 px-6 text-gray-900">{project.type}</td>
+                                    <td className="py-4 px-6 text-gray-900">{project.type || 'N/A'}</td>
                   <td className="py-4 px-6">
                     <div className="flex items-center space-x-3">
                       <div className="flex-1 bg-gray-200 rounded-full h-2 min-w-[80px]">
@@ -257,7 +255,7 @@ const ProjectsManagement = () => {
                       <span className="text-sm font-medium text-gray-700">{project.progress}%</span>
                     </div>
                   </td>
-                  <td className="py-4 px-6 font-medium text-gray-900">€{project.budget.toLocaleString()}</td>
+                                    <td className="py-4 px-6 font-medium text-gray-900">€{(project.budget || 0).toLocaleString()}</td>
                   <td className="py-4 px-6">
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(project.status)}`}>
                       {getStatusText(project.status)}

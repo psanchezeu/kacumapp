@@ -10,8 +10,21 @@ import Contact from './components/Contact';
 import Footer from './components/Footer';
 import LoginForm from './components/auth/LoginForm';
 
+// Componentes de autenticación y dashboard
 import AuthCallback from './components/auth/AuthCallback';
 import DashboardLayout from './components/dashboard/DashboardLayout';
+
+// Componentes de administración
+import AdminDashboard from './components/dashboard/admin/AdminDashboard';
+import ClientsManagement from './components/dashboard/admin/ClientsManagement';
+import ClientDetail from './components/dashboard/admin/clients/ClientDetail';
+import ProjectsManagement from './components/dashboard/admin/ProjectsManagement';
+import TasksManagement from './components/dashboard/admin/TasksManagement';
+import InvoicesManagement from './components/dashboard/admin/InvoicesManagement';
+import RequestsManagement from './components/dashboard/admin/RequestsManagement';
+import Settings from './components/dashboard/admin/Settings';
+import UserProfile from './components/dashboard/client/UserProfile';
+import UserSettings from './components/dashboard/client/UserSettings';
 
 const PublicLayout = () => {
   return (
@@ -69,19 +82,28 @@ function App() {
       <UIProvider>
         <Router>
           <Routes>
-          <Route path="/" element={<PublicLayout />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/auth/callback" element={<AuthCallback />} />
-          <Route 
-            path="/dashboard/*" 
-            element={
+            <Route path="/" element={<PublicLayout />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/dashboard" element={
               <ProtectedRoute>
                 <DashboardLayout />
               </ProtectedRoute>
-            } 
-          />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+            }>
+              {/* Rutas anidadas para el dashboard */}
+              <Route index element={<AdminDashboard />} />
+              <Route path="clients" element={<ClientsManagement />} />
+              <Route path="clients/new" element={<ClientDetail />} />
+              <Route path="clients/:id" element={<ClientDetail />} />
+              <Route path="projects/*" element={<ProjectsManagement />} />
+              <Route path="tasks/*" element={<TasksManagement />} />
+              <Route path="invoices/*" element={<InvoicesManagement />} />
+              <Route path="requests/*" element={<RequestsManagement />} />
+              <Route path="settings/*" element={<Settings />} />
+              <Route path="profile/*" element={<UserProfile />} />
+            </Route>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
       </Router>
       </UIProvider>
     </AuthProvider>

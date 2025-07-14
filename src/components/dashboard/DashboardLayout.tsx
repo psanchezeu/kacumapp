@@ -1,28 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useAuth } from '../../contexts/AuthContext';
+import { useLocation, Outlet } from 'react-router-dom';
+// Mantenemos la importación de AuthContext comentada por si se necesita en el futuro
+// import { useAuth } from '../../contexts/AuthContext';
 import { useUI } from '../../contexts/UIContext';
 import Sidebar from './Sidebar';
-import AdminDashboard from './admin/AdminDashboard';
-import ClientDashboard from './client/ClientDashboard';
-import RequestsManagement from './admin/RequestsManagement';
-import ProjectsManagement from './admin/ProjectsManagement';
-import ClientsManagement from './admin/ClientsManagement';
-import TasksManagement from './admin/TasksManagement';
-import InvoicesManagement from './admin/InvoicesManagement';
-import UserProfile from './client/UserProfile';
-import UserSettings from './client/UserSettings';
 
 const DashboardLayout: React.FC = () => {
-  const { user } = useAuth();
+  // const { user } = useAuth(); // Comentado temporalmente ya que no se usa
   const { preferences, isMobile } = useUI();
+  const location = useLocation();
+  // const navigate = useNavigate(); // Comentado temporalmente ya que no se usa
   const [activeSection, setActiveSection] = useState('dashboard');
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     setIsLoading(false);
-  }, []);
+    
+    // Determinar la sección activa basada en la ruta actual
+    const path = location.pathname;
+    if (path.includes('/clients')) {
+      setActiveSection('clients');
+    } else if (path.includes('/projects')) {
+      setActiveSection('projects');
+    } else if (path.includes('/tasks')) {
+      setActiveSection('tasks');
+    } else if (path.includes('/invoices')) {
+      setActiveSection('invoices');
+    } else if (path.includes('/requests')) {
+      setActiveSection('requests');
+    } else if (path.includes('/settings')) {
+      setActiveSection('settings');
+    } else {
+      setActiveSection('dashboard');
+    }
+  }, [location]);
 
   useEffect(() => {
     if (isMobile) {
@@ -35,45 +48,7 @@ const DashboardLayout: React.FC = () => {
     window.scrollTo(0, 0);
   };
 
-  const renderContent = () => {
-    if ((user as any)?.role === 'admin') {
-      switch (activeSection) {
-        case 'dashboard':
-          return <AdminDashboard />;
-        case 'requests':
-          return <RequestsManagement />;
-        case 'projects':
-          return <ProjectsManagement />;
-        case 'clients':
-          return <ClientsManagement />;
-        case 'tasks':
-          return <TasksManagement />;
-        case 'invoices':
-          return <InvoicesManagement />;
-        case 'settings':
-          return <UserSettings />;
-        default:
-          return <AdminDashboard />;
-      }
-    } else {
-      switch (activeSection) {
-        case 'dashboard':
-          return <ClientDashboard />;
-        case 'requests':
-          return <div className="p-6"><h1 className="text-2xl font-bold">Mis Solicitudes</h1><p className="text-gray-600 mt-2">Funcionalidad en desarrollo...</p></div>;
-        case 'projects':
-          return <div className="p-6"><h1 className="text-2xl font-bold">Mis Proyectos</h1><p className="text-gray-600 mt-2">Funcionalidad en desarrollo...</p></div>;
-        case 'invoices':
-          return <div className="p-6"><h1 className="text-2xl font-bold">Mis Facturas</h1><p className="text-gray-600 mt-2">Funcionalidad en desarrollo...</p></div>;
-        case 'profile':
-          return <UserProfile />;
-        case 'settings':
-          return <UserSettings />;
-        default:
-          return <ClientDashboard />;
-      }
-    }
-  };
+  // Ya no necesitamos la función renderContent, las rutas se manejan con React Router
 
   return (
     <div 
@@ -107,7 +82,7 @@ const DashboardLayout: React.FC = () => {
           )}
           
           {/* Sidebar con posicionamiento condicional para móvil */}
-          <Sidebar activeSection={activeSection} onSectionChange={handleSectionChange} />
+          <Sidebar onSectionChange={handleSectionChange} />
           
           {/* Main Content Area */}
           <motion.main 
@@ -118,7 +93,8 @@ const DashboardLayout: React.FC = () => {
               (!preferences.collapseMenu && !isMobile) ? 'ml-64' : isMobile ? 'ml-0' : 'ml-20'
             } ${preferences.darkMode ? 'bg-gray-950' : 'bg-gray-50'}`}
           >
-            {renderContent()}
+            {/* Usamos Outlet para que el contenido de las rutas secundarias se rendericen aquí */}
+            <Outlet />
           </motion.main>
         </div>
       )}

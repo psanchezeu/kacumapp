@@ -1,43 +1,41 @@
 import React, { useState } from 'react';
 import { Eye, CheckCircle, XCircle, Clock, MessageSquare, Filter } from 'lucide-react';
 import { mockRequests } from '../../../data/mockData';
-import { Request } from '../../../types';
+import { Request, RequestStatus } from '../../../types';
 
 const RequestsManagement = () => {
   const [requests, setRequests] = useState<Request[]>(mockRequests);
   const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
-  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterStatus, setFilterStatus] = useState<RequestStatus | 'all'>('all');
 
   const filteredRequests = filterStatus === 'all' 
     ? requests 
     : requests.filter(r => r.status === filterStatus);
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: RequestStatus) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'reviewing': return 'bg-blue-100 text-blue-800';
-      case 'approved': return 'bg-green-100 text-green-800';
-      case 'rejected': return 'bg-red-100 text-red-800';
-      case 'in_development': return 'bg-purple-100 text-purple-800';
+      case 'Pending': return 'bg-yellow-100 text-yellow-800';
+      case 'Approved': return 'bg-blue-100 text-blue-800';
+      case 'Rejected': return 'bg-red-100 text-red-800';
+      case 'In Development': return 'bg-purple-100 text-purple-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const getStatusText = (status: string) => {
+  const getStatusText = (status: RequestStatus) => {
     switch (status) {
-      case 'pending': return 'Pendiente';
-      case 'reviewing': return 'Revisando';
-      case 'approved': return 'Aprobado';
-      case 'rejected': return 'Rechazado';
-      case 'in_development': return 'En Desarrollo';
+      case 'Pending': return 'Pendiente';
+      case 'Approved': return 'Aprobado';
+      case 'Rejected': return 'Rechazado';
+      case 'In Development': return 'En Desarrollo';
       default: return status;
     }
   };
 
-  const updateRequestStatus = (requestId: string, newStatus: string, notes?: string) => {
+  const updateRequestStatus = (requestId: string, newStatus: RequestStatus, notes?: string) => {
     setRequests(prev => prev.map(req => 
       req.id === requestId 
-        ? { ...req, status: newStatus as any, updatedAt: new Date().toISOString(), notes }
+        ? { ...req, status: newStatus, updatedAt: new Date().toISOString(), notes }
         : req
     ));
     setSelectedRequest(null);
@@ -97,14 +95,13 @@ const RequestsManagement = () => {
               <label className="block text-sm font-semibold text-gray-700 mb-2">Estado</label>
               <select
                 value={newStatus}
-                onChange={(e) => setNewStatus(e.target.value)}
+                onChange={(e) => setNewStatus(e.target.value as RequestStatus)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="pending">Pendiente</option>
-                <option value="reviewing">Revisando</option>
-                <option value="approved">Aprobado</option>
-                <option value="rejected">Rechazado</option>
-                <option value="in_development">En Desarrollo</option>
+                <option value="Pending">Pendiente</option>
+                <option value="Approved">Aprobado</option>
+                <option value="Rejected">Rechazado</option>
+                <option value="In Development">En Desarrollo</option>
               </select>
             </div>
 
@@ -152,15 +149,14 @@ const RequestsManagement = () => {
             <Filter className="w-5 h-5 text-gray-500" />
             <select
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
+              onChange={(e) => setFilterStatus(e.target.value as RequestStatus | 'all')}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">Todas</option>
-              <option value="pending">Pendientes</option>
-              <option value="reviewing">Revisando</option>
-              <option value="approved">Aprobadas</option>
-              <option value="rejected">Rechazadas</option>
-              <option value="in_development">En Desarrollo</option>
+              <option value="Pending">Pendientes</option>
+              <option value="Approved">Aprobadas</option>
+              <option value="Rejected">Rechazadas</option>
+              <option value="In Development">En Desarrollo</option>
             </select>
           </div>
         </div>

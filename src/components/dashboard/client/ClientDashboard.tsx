@@ -1,14 +1,45 @@
-import React from 'react';
+import { useState, useEffect } from 'react';
 import { FolderOpen, MessageSquare, FileText, Clock, CheckCircle, TrendingUp } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
-import { mockRequests, mockProjects, mockInvoices } from '../../../data/mockData';
+import api from '../../../services/api';
+import { Request, Project, Invoice } from '../../../types/index';
 
 const ClientDashboard = () => {
   const { user } = useAuth();
-  
-  const clientRequests = mockRequests.filter(r => r.clientId === user?.id);
-  const clientProjects = mockProjects.filter(p => p.clientId === user?.id);
-  const clientInvoices = mockInvoices.filter(i => i.clientId === user?.id);
+  const [loading, setLoading] = useState(true);
+  const [clientRequests, setClientRequests] = useState<Request[]>([]);
+  const [clientProjects, setClientProjects] = useState<Project[]>([]);
+  const [clientInvoices, setClientInvoices] = useState<Invoice[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        // Fetch real data from API endpoints
+        if (user?.id) {
+          const [requestsRes, projectsRes, invoicesRes] = await Promise.all([
+            api.get(`/api/requests?clientId=${user.id}`),
+            api.get(`/api/projects?clientId=${user.id}`),
+            api.get(`/api/invoices?clientId=${user.id}`)
+          ]);
+
+          setClientRequests(requestsRes.data || []);
+          setClientProjects(projectsRes.data || []);
+          setClientInvoices(invoicesRes.data || []);
+        }
+      } catch (error) {
+        console.error('Error fetching client dashboard data:', error);
+        // Inicializar con arrays vacíos en caso de error
+        setClientRequests([]);
+        setClientProjects([]);
+        setClientInvoices([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [user?.id]);
 
   const stats = [
     {
@@ -62,6 +93,14 @@ const ClientDashboard = () => {
       default: return status;
     }
   };
+
+  if (loading) {
+    return (
+      <div className="p-6 flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">

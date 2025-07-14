@@ -1,12 +1,11 @@
-import React from 'react';
-import { Users, MessageSquare, FolderOpen, TrendingUp, CheckCircle, Clock, AlertTriangle, DollarSign } from 'lucide-react';
-import { mockRequests, mockProjects, mockInvoices } from '../../../data/mockData';
+import { Users, MessageSquare, FolderOpen, TrendingUp, CheckCircle, DollarSign } from 'lucide-react';
+import { mockRequests, mockProjects } from '../../../data/mockData';
 
 const AdminDashboard = () => {
   const stats = [
     {
       title: 'Solicitudes Pendientes',
-      value: mockRequests.filter(r => r.status === 'pending').length,
+      value: mockRequests.filter(r => r.status === 'Pending').length,
       icon: MessageSquare,
       color: 'from-yellow-500 to-orange-500',
       bgColor: 'bg-yellow-50',
@@ -14,7 +13,7 @@ const AdminDashboard = () => {
     },
     {
       title: 'Proyectos Activos',
-      value: mockProjects.filter(p => p.status === 'development').length,
+      value: mockProjects.filter(p => p.status === 'Development').length,
       icon: FolderOpen,
       color: 'from-blue-500 to-cyan-500',
       bgColor: 'bg-blue-50',
@@ -39,26 +38,26 @@ const AdminDashboard = () => {
   ];
 
   const recentRequests = mockRequests.slice(0, 5);
-  const activeProjects = mockProjects.filter(p => p.status === 'development');
+  const activeProjects = mockProjects.filter(p => p.status === 'Development');
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'approved': return 'bg-green-100 text-green-800';
-      case 'in_development': return 'bg-blue-100 text-blue-800';
-      case 'development': return 'bg-blue-100 text-blue-800';
-      case 'completed': return 'bg-green-100 text-green-800';
+      case 'Pending': return 'bg-yellow-100 text-yellow-800';
+      case 'Approved': return 'bg-green-100 text-green-800';
+      case 'In Development': return 'bg-blue-100 text-blue-800';
+      case 'Development': return 'bg-blue-100 text-blue-800';
+      case 'Completed': return 'bg-green-100 text-green-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'pending': return 'Pendiente';
-      case 'approved': return 'Aprobado';
-      case 'in_development': return 'En Desarrollo';
-      case 'development': return 'En Desarrollo';
-      case 'completed': return 'Completado';
+      case 'Pending': return 'Pendiente';
+      case 'Approved': return 'Aprobado';
+      case 'In Development': return 'En Desarrollo';
+      case 'Development': return 'En Desarrollo';
+      case 'Completed': return 'Completado';
       default: return status;
     }
   };

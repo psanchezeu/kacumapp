@@ -1,628 +1,334 @@
-import React, { useState } from 'react';
-import { Plus, Eye, Edit, Trash2, FileText, DollarSign, Calendar, Send } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Plus, Eye, Edit, Trash2 } from 'lucide-react';
 import { mockInvoices, mockProjects } from '../../../data/mockData';
 import { Invoice, InvoiceItem } from '../../../types';
 
-const InvoicesManagement = () => {
+// Helper para formatear fechas a YYYY-MM-DD para inputs
+const formatDateForInput = (date: string | Date | undefined): string => {
+  if (!date) return '';
+  try {
+    // Intenta crear una fecha; si es inválida, devuelve una cadena vacía
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return '';
+    return d.toISOString().split('T')[0];
+  } catch (error) {
+    return '';
+  }
+};
+
+// Estado inicial para el formulario de factura
+const initialInvoiceFormData: Omit<Invoice, 'id' | 'clientName'> = {
+  invoiceNumber: '',
+  clientId: '',
+  projectId: '',
+  issueDate: '',
+  dueDate: '',
+  items: [],
+  amount: 0,
+  status: 'Draft',
+};
+
+// Estado inicial para un nuevo concepto de factura
+const initialNewItem: Omit<InvoiceItem, 'id' | 'amount'> = {
+  description: '',
+  quantity: 1,
+  rate: 0,
+};
+
+const InvoicesManagement: React.FC = () => {
   const [invoices, setInvoices] = useState<Invoice[]>(mockInvoices);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
-  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [invoiceFormData, setInvoiceFormData] = useState<Partial<Invoice>>(initialInvoiceFormData);
+  const [newItem, setNewItem] = useState(initialNewItem);
+  const [filterStatus, setFilterStatus] = useState<Invoice['status'] | 'all'>('all');
 
-  const [newInvoice, setNewInvoice] = useState({
-    clientId: '',
-    projectId: '',
-    number: '',
-    amount: 0,
-    status: 'draft' as Invoice['status'],
-    issueDate: '',
-    dueDate: '',
-    items: [] as InvoiceItem[]
-  });
+  const filteredInvoices = useMemo(() => {
+    if (filterStatus === 'all') return invoices;
+    return invoices.filter(i => i.status === filterStatus);
+  }, [invoices, filterStatus]);
 
-  const [newItem, setNewItem] = useState({
-    description: '',
-    quantity: 1,
-    rate: 0
-  });
-
-  const filteredInvoices = filterStatus === 'all' 
-    ? invoices 
-    : invoices.filter(i => i.status === filterStatus);
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'draft': return 'bg-gray-100 text-gray-800';
-      case 'sent': return 'bg-yellow-100 text-yellow-800';
-      case 'paid': return 'bg-green-100 text-green-800';
-      case 'overdue': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'draft': return 'Borrador';
-      case 'sent': return 'Enviada';
-      case 'paid': return 'Pagada';
-      case 'overdue': return 'Vencida';
-      default: return status;
-    }
-  };
-
-  const generateInvoiceNumber = () => {
-    const year = new Date().getFullYear();
-    const count = invoices.length + 1;
-    return `INV-${year}-${count.toString().padStart(3, '0')}`;
-  };
-
-  const addItemToInvoice = () => {
-    if (!newItem.description || newItem.rate <= 0) return;
-
-    const item: InvoiceItem = {
-      id: Date.now().toString(),
-      ...newItem,
-      amount: newItem.quantity * newItem.rate
+  const getStatusColor = (status: Invoice['status']) => {
+    const colors: Record<Invoice['status'], string> = {
+      Draft: 'bg-gray-200 text-gray-800',
+      Sent: 'bg-blue-200 text-blue-800',
+      Paid: 'bg-green-200 text-green-800',
+      Overdue: 'bg-red-200 text-red-800',
     };
-
-    setNewInvoice({
-      ...newInvoice,
-      items: [...newInvoice.items, item],
-      amount: newInvoice.amount + item.amount
-    });
-
-    setNewItem({ description: '', quantity: 1, rate: 0 });
+    return colors[status] || 'bg-gray-200 text-gray-800';
   };
 
-  const removeItemFromInvoice = (itemId: string) => {
-    const item = newInvoice.items.find(i => i.id === itemId);
-    if (!item) return;
-
-    setNewInvoice({
-      ...newInvoice,
-      items: newInvoice.items.filter(i => i.id !== itemId),
-      amount: newInvoice.amount - item.amount
-    });
-  };
-
-  const handleAddInvoice = () => {
-    const invoice: Invoice = {
-      id: Date.now().toString(),
-      ...newInvoice,
-      number: newInvoice.number || generateInvoiceNumber(),
-      createdAt: new Date().toISOString()
+  const getStatusText = (status: Invoice['status']) => {
+    const texts: Record<Invoice['status'], string> = {
+      Draft: 'Borrador',
+      Sent: 'Enviada',
+      Paid: 'Pagada',
+      Overdue: 'Vencida',
     };
-
-    setInvoices([...invoices, invoice]);
-    setNewInvoice({
-      clientId: '',
-      projectId: '',
-      number: '',
-      amount: 0,
-      status: 'draft',
-      issueDate: '',
-      dueDate: '',
-      items: []
-    });
-    setShowAddModal(false);
+    return texts[status] || status;
   };
 
-  const handleEditInvoice = (invoice: Invoice) => {
-    setEditingInvoice(invoice);
-    setNewInvoice({
-      clientId: invoice.clientId,
-      projectId: invoice.projectId,
-      number: invoice.number,
-      amount: invoice.amount,
-      status: invoice.status,
-      issueDate: invoice.issueDate.split('T')[0],
-      dueDate: invoice.dueDate.split('T')[0],
-      items: invoice.items
-    });
+  const openModal = (invoice?: Invoice) => {
+    if (invoice) {
+      setIsEditMode(true);
+      setInvoiceFormData({
+        ...invoice,
+        issueDate: formatDateForInput(invoice.issueDate),
+        dueDate: formatDateForInput(invoice.dueDate),
+      });
+    } else {
+      setIsEditMode(false);
+      const newInvoiceNumber = `INV-${new Date().getFullYear()}-${invoices.length + 1}`;
+      setInvoiceFormData({ ...initialInvoiceFormData, invoiceNumber: newInvoiceNumber });
+    }
+    setIsModalOpen(true);
   };
 
-  const handleUpdateInvoice = () => {
-    if (!editingInvoice) return;
-
-    setInvoices(invoices.map(invoice => 
-      invoice.id === editingInvoice.id 
-        ? { ...invoice, ...newInvoice }
-        : invoice
-    ));
-    setEditingInvoice(null);
-    setNewInvoice({
-      clientId: '',
-      projectId: '',
-      number: '',
-      amount: 0,
-      status: 'draft',
-      issueDate: '',
-      dueDate: '',
-      items: []
-    });
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedInvoice(null);
+    setInvoiceFormData(initialInvoiceFormData);
+    setNewItem(initialNewItem);
   };
 
-  const handleDeleteInvoice = (invoiceId: string) => {
-    if (confirm('¿Estás seguro de que quieres eliminar esta factura?')) {
-      setInvoices(invoices.filter(invoice => invoice.id !== invoiceId));
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setInvoiceFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleItemChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setNewItem(prev => ({ ...prev, [name]: name === 'description' ? value : parseFloat(value) || 0 }));
+  };
+
+  const addItem = () => {
+    if (!newItem.description || !newItem.rate) return;
+    const newAmount = (newItem.quantity || 1) * newItem.rate;
+    const itemToAdd: InvoiceItem = { ...newItem, id: Date.now().toString(), amount: newAmount };
+    setInvoiceFormData(prev => ({
+      ...prev,
+      items: [...(prev.items || []), itemToAdd],
+      amount: (prev.amount || 0) + newAmount,
+    }));
+    setNewItem(initialNewItem);
+  };
+
+  const removeItem = (itemId: string) => {
+    const itemToRemove = (invoiceFormData.items || []).find(i => i.id === itemId);
+    if (!itemToRemove) return;
+    setInvoiceFormData(prev => ({
+      ...prev,
+      items: (prev.items || []).filter(i => i.id !== itemId),
+      amount: (prev.amount || 0) - itemToRemove.amount,
+    }));
+  };
+
+  const handleSave = () => {
+    const clientName = mockProjects.find(p => p.id === invoiceFormData.projectId)?.clientName || 'N/A';
+
+    if (isEditMode) {
+      if (!invoiceFormData.id) {
+        console.error('Error: No se puede actualizar una factura sin ID.');
+        return;
+      }
+      const updatedInvoice: Invoice = {
+        ...initialInvoiceFormData,
+        ...invoiceFormData,
+        id: invoiceFormData.id,
+        clientName,
+      };
+      setInvoices(invoices.map(inv => (inv.id === updatedInvoice.id ? updatedInvoice : inv)));
+    } else {
+      const newInvoice: Invoice = {
+        ...initialInvoiceFormData,
+        ...invoiceFormData,
+        id: Date.now().toString(),
+        clientName,
+      };
+      setInvoices(prevInvoices => [...prevInvoices, newInvoice]);
+    }
+    closeModal();
+  };
+
+  const handleDelete = (id: string) => {
+    if (window.confirm('¿Confirmas la eliminación de esta factura?')) {
+      setInvoices(invoices.filter(inv => inv.id !== id));
     }
   };
 
-  const handleStatusChange = (invoiceId: string, newStatus: Invoice['status']) => {
-    setInvoices(invoices.map(invoice => 
-      invoice.id === invoiceId 
-        ? { 
-            ...invoice, 
-            status: newStatus,
-            paidDate: newStatus === 'paid' ? new Date().toISOString() : invoice.paidDate
-          }
-        : invoice
-    ));
+  const handleStatusChange = (id: string, status: Invoice['status']) => {
+    setInvoices(invoices.map(inv => (inv.id === id ? { ...inv, status } : inv)));
+    if (selectedInvoice?.id === id) {
+      setSelectedInvoice(prev => (prev ? { ...prev, status } : null));
+    }
   };
-
-  const InvoiceModal = ({ invoice, onClose }: { invoice: Invoice; onClose: () => void }) => {
-    const project = mockProjects.find(p => p.id === invoice.projectId);
-    
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div className="bg-white rounded-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Factura {invoice.number}</h2>
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-              ×
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Número</label>
-                  <p className="text-gray-900">{invoice.number}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Proyecto</label>
-                  <p className="text-gray-900">{project?.name || 'Sin proyecto'}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Fecha Emisión</label>
-                  <p className="text-gray-900">{new Date(invoice.issueDate).toLocaleDateString()}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Fecha Vencimiento</label>
-                  <p className="text-gray-900">{new Date(invoice.dueDate).toLocaleDateString()}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Estado</label>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(invoice.status)}`}>
-                    {getStatusText(invoice.status)}
-                  </span>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Total</label>
-                  <p className="text-2xl font-bold text-gray-900">€{invoice.amount.toLocaleString()}</p>
-                </div>
-              </div>
-
-              <div>
-                <h4 className="text-lg font-bold text-gray-900 mb-4">Conceptos</h4>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="text-left py-2 px-4 font-semibold text-gray-900">Descripción</th>
-                        <th className="text-left py-2 px-4 font-semibold text-gray-900">Cantidad</th>
-                        <th className="text-left py-2 px-4 font-semibold text-gray-900">Precio</th>
-                        <th className="text-left py-2 px-4 font-semibold text-gray-900">Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {invoice.items.map((item) => (
-                        <tr key={item.id} className="border-b border-gray-100">
-                          <td className="py-2 px-4 text-gray-900">{item.description}</td>
-                          <td className="py-2 px-4 text-gray-900">{item.quantity}</td>
-                          <td className="py-2 px-4 text-gray-900">€{item.rate.toLocaleString()}</td>
-                          <td className="py-2 px-4 font-semibold text-gray-900">€{item.amount.toLocaleString()}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-4 rounded-lg border border-blue-100">
-                <h4 className="font-bold text-gray-900 mb-3">Cambiar Estado</h4>
-                <div className="space-y-2">
-                  {['draft', 'sent', 'paid', 'overdue'].map((status) => (
-                    <button
-                      key={status}
-                      onClick={() => handleStatusChange(invoice.id, status as Invoice['status'])}
-                      className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                        invoice.status === status 
-                          ? getStatusColor(status)
-                          : 'bg-white hover:bg-gray-50'
-                      }`}
-                    >
-                      {getStatusText(status)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-white border border-gray-200 p-4 rounded-lg">
-                <h4 className="font-bold text-gray-900 mb-3">Acciones</h4>
-                <div className="space-y-2">
-                  <button className="w-full text-left px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                    Descargar PDF
-                  </button>
-                  <button className="w-full text-left px-3 py-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors">
-                    Enviar por Email
-                  </button>
-                  <button className="w-full text-left px-3 py-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
-                    Duplicar Factura
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const AddEditModal = ({ isEdit = false, onClose }: { isEdit?: boolean; onClose: () => void }) => (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">
-            {isEdit ? 'Editar Factura' : 'Nueva Factura'}
-          </h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-            ×
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Número de Factura</label>
-              <input
-                type="text"
-                value={newInvoice.number}
-                onChange={(e) => setNewInvoice({ ...newInvoice, number: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder={generateInvoiceNumber()}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Proyecto</label>
-              <select
-                value={newInvoice.projectId}
-                onChange={(e) => setNewInvoice({ ...newInvoice, projectId: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">Seleccionar proyecto</option>
-                {mockProjects.map((project) => (
-                  <option key={project.id} value={project.id}>{project.name}</option>
-                ))}
-              </select>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Fecha Emisión</label>
-                <input
-                  type="date"
-                  value={newInvoice.issueDate}
-                  onChange={(e) => setNewInvoice({ ...newInvoice, issueDate: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Fecha Vencimiento</label>
-                <input
-                  type="date"
-                  value={newInvoice.dueDate}
-                  onChange={(e) => setNewInvoice({ ...newInvoice, dueDate: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Estado</label>
-              <select
-                value={newInvoice.status}
-                onChange={(e) => setNewInvoice({ ...newInvoice, status: e.target.value as Invoice['status'] })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="draft">Borrador</option>
-                <option value="sent">Enviada</option>
-                <option value="paid">Pagada</option>
-                <option value="overdue">Vencida</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <h3 className="text-lg font-bold text-gray-900">Añadir Conceptos</h3>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Descripción</label>
-              <input
-                type="text"
-                value={newItem.description}
-                onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Descripción del servicio"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Cantidad</label>
-                <input
-                  type="number"
-                  value={newItem.quantity}
-                  onChange={(e) => setNewItem({ ...newItem, quantity: parseInt(e.target.value) || 1 })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  min="1"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Precio €</label>
-                <input
-                  type="number"
-                  value={newItem.rate}
-                  onChange={(e) => setNewItem({ ...newItem, rate: parseFloat(e.target.value) || 0 })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  min="0"
-                  step="0.01"
-                />
-              </div>
-            </div>
-            <button
-              onClick={addItemToInvoice}
-              className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors"
-            >
-              Añadir Concepto
-            </button>
-
-            {newInvoice.items.length > 0 && (
-              <div>
-                <h4 className="font-semibold text-gray-900 mb-2">Conceptos añadidos:</h4>
-                <div className="space-y-2 max-h-40 overflow-y-auto">
-                  {newInvoice.items.map((item) => (
-                    <div key={item.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">{item.description}</p>
-                        <p className="text-xs text-gray-600">{item.quantity} x €{item.rate} = €{item.amount}</p>
-                      </div>
-                      <button
-                        onClick={() => removeItemFromInvoice(item.id)}
-                        className="text-red-600 hover:text-red-800"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-2 p-2 bg-blue-50 rounded">
-                  <p className="font-bold text-blue-900">Total: €{newInvoice.amount.toLocaleString()}</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="mt-6 flex space-x-4">
-          <button
-            onClick={isEdit ? handleUpdateInvoice : handleAddInvoice}
-            className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-3 px-6 rounded-lg font-semibold hover:from-blue-600 hover:to-cyan-600 transition-all duration-300"
-          >
-            {isEdit ? 'Actualizar' : 'Crear Factura'}
-          </button>
-          <button
-            onClick={onClose}
-            className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-300"
-          >
-            Cancelar
-          </button>
-        </div>
-      </div>
-    </div>
-  );
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Gestión de Facturas</h1>
-          <p className="text-gray-600">Administra todas las facturas y pagos</p>
-        </div>
-        
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-600 hover:to-cyan-600 transition-all duration-300"
-        >
-          <Plus className="w-5 h-5" />
-          <span>Nueva Factura</span>
+    <div className="bg-white p-6 rounded-lg shadow-sm">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-gray-800">Gestión de Facturas</h2>
+        <button onClick={() => openModal()} className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+          <Plus size={18} className="mr-2" /> Nueva Factura
         </button>
       </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">Total Facturas</p>
-              <p className="text-3xl font-bold text-gray-900">{invoices.length}</p>
-            </div>
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
-              <FileText className="w-6 h-6 text-white" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">Pagadas</p>
-              <p className="text-3xl font-bold text-gray-900">{invoices.filter(i => i.status === 'paid').length}</p>
-            </div>
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
-              <DollarSign className="w-6 h-6 text-white" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">Pendientes</p>
-              <p className="text-3xl font-bold text-gray-900">{invoices.filter(i => i.status === 'sent').length}</p>
-            </div>
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center">
-              <Send className="w-6 h-6 text-white" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">Ingresos</p>
-              <p className="text-3xl font-bold text-gray-900">
-                €{invoices.filter(i => i.status === 'paid').reduce((sum, i) => sum + i.amount, 0).toLocaleString()}
-              </p>
-            </div>
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-              <Calendar className="w-6 h-6 text-white" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex items-center space-x-4 mb-6">
-        <select
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        >
-          <option value="all">Todos los estados</option>
-          <option value="draft">Borrador</option>
-          <option value="sent">Enviada</option>
-          <option value="paid">Pagada</option>
-          <option value="overdue">Vencida</option>
-        </select>
-      </div>
-
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="text-left py-4 px-6 font-semibold text-gray-900">Número</th>
-                <th className="text-left py-4 px-6 font-semibold text-gray-900">Proyecto</th>
-                <th className="text-left py-4 px-6 font-semibold text-gray-900">Importe</th>
-                <th className="text-left py-4 px-6 font-semibold text-gray-900">Estado</th>
-                <th className="text-left py-4 px-6 font-semibold text-gray-900">Fecha Emisión</th>
-                <th className="text-left py-4 px-6 font-semibold text-gray-900">Vencimiento</th>
-                <th className="text-left py-4 px-6 font-semibold text-gray-900">Acciones</th>
+      <select value={filterStatus} onChange={e => setFilterStatus(e.target.value as any)} className="mb-4 p-2 border rounded">
+        <option value="all">Todos</option>
+        <option value="Draft">Borrador</option>
+        <option value="Sent">Enviada</option>
+        <option value="Paid">Pagada</option>
+        <option value="Overdue">Vencida</option>
+      </select>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm text-left text-gray-500">
+          <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+            <tr>
+              <th className="px-6 py-3">Nº Factura</th>
+              <th className="px-6 py-3">Cliente</th>
+              <th className="px-6 py-3">Fecha</th>
+              <th className="px-6 py-3">Total</th>
+              <th className="px-6 py-3">Estado</th>
+              <th className="px-6 py-3">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredInvoices.map(invoice => (
+              <tr key={invoice.id} className="bg-white border-b hover:bg-gray-50">
+                <td className="px-6 py-4">{invoice.invoiceNumber}</td>
+                <td className="px-6 py-4">{invoice.clientName}</td>
+                <td className="px-6 py-4">{formatDateForInput(invoice.issueDate)}</td>
+                <td className="px-6 py-4">€{invoice.amount.toFixed(2)}</td>
+                <td className="px-6 py-4">
+                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(invoice.status)}`}>
+                    {getStatusText(invoice.status)}
+                  </span>
+                </td>
+                <td className="px-6 py-4 flex space-x-2">
+                  <button onClick={() => setSelectedInvoice(invoice)}><Eye size={18} /></button>
+                  <button onClick={() => openModal(invoice)}><Edit size={18} /></button>
+                  <button onClick={() => handleDelete(invoice.id)}><Trash2 size={18} /></button>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {filteredInvoices.map((invoice) => {
-                const project = mockProjects.find(p => p.id === invoice.projectId);
-                return (
-                  <tr key={invoice.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-4 px-6 font-medium text-gray-900">{invoice.number}</td>
-                    <td className="py-4 px-6 text-gray-900">{project?.name || 'Sin proyecto'}</td>
-                    <td className="py-4 px-6 font-semibold text-gray-900">€{invoice.amount.toLocaleString()}</td>
-                    <td className="py-4 px-6">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(invoice.status)}`}>
-                        {getStatusText(invoice.status)}
-                      </span>
-                    </td>
-                    <td className="py-4 px-6 text-gray-600">
-                      {new Date(invoice.issueDate).toLocaleDateString()}
-                    </td>
-                    <td className="py-4 px-6 text-gray-600">
-                      {new Date(invoice.dueDate).toLocaleDateString()}
-                    </td>
-                    <td className="py-4 px-6">
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() => setSelectedInvoice(invoice)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleEditInvoice(invoice)}
-                          className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteInvoice(invoice.id)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
+
+      {isModalOpen && (
+        <AddEditModal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          onSave={handleSave}
+          isEdit={isEditMode}
+          invoiceData={invoiceFormData as Omit<Invoice, 'id' | 'clientName'>}
+          onFormChange={handleFormChange}
+          newItem={newItem}
+          onItemChange={handleItemChange}
+          addItem={addItem}
+          removeItem={removeItem}
+        />
+      )}
 
       {selectedInvoice && (
-        <InvoiceModal
+        <InvoiceDetailModal
           invoice={selectedInvoice}
           onClose={() => setSelectedInvoice(null)}
-        />
-      )}
-
-      {showAddModal && (
-        <AddEditModal
-          onClose={() => {
-            setShowAddModal(false);
-            setNewInvoice({
-              clientId: '',
-              projectId: '',
-              number: '',
-              amount: 0,
-              status: 'draft',
-              issueDate: '',
-              dueDate: '',
-              items: []
-            });
-          }}
-        />
-      )}
-
-      {editingInvoice && (
-        <AddEditModal
-          isEdit={true}
-          onClose={() => {
-            setEditingInvoice(null);
-            setNewInvoice({
-              clientId: '',
-              projectId: '',
-              number: '',
-              amount: 0,
-              status: 'draft',
-              issueDate: '',
-              dueDate: '',
-              items: []
-            });
-          }}
+          onStatusChange={handleStatusChange}
+          getStatusColor={getStatusColor}
+          getStatusText={getStatusText}
         />
       )}
     </div>
   );
 };
+
+// --- MODAL COMPONENTS ---
+
+interface AddEditModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: () => void;
+  isEdit: boolean;
+  invoiceData: Omit<Invoice, 'id' | 'clientName'>;
+  onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  newItem: Omit<InvoiceItem, 'id' | 'amount'>;
+  onItemChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  addItem: () => void;
+  removeItem: (id: string) => void;
+}
+
+const AddEditModal: React.FC<AddEditModalProps> = ({ isOpen, onClose, onSave, isEdit, invoiceData, onFormChange, newItem, onItemChange, addItem, removeItem }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+        <h2 className="text-xl font-bold mb-4">{isEdit ? 'Editar Factura' : 'Crear Factura'}</h2>
+        {/* Form Fields */}
+        <div className="grid grid-cols-2 gap-4">
+          <input name="invoiceNumber" value={invoiceData.invoiceNumber} onChange={onFormChange} placeholder="Nº Factura" className="p-2 border rounded" />
+          <select name="projectId" value={invoiceData.projectId} onChange={onFormChange} className="p-2 border rounded">
+            <option value="">Seleccionar Proyecto</option>
+            {mockProjects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
+          <input name="issueDate" type="date" value={invoiceData.issueDate as string} onChange={onFormChange} className="p-2 border rounded" />
+          <input name="dueDate" type="date" value={invoiceData.dueDate as string} onChange={onFormChange} className="p-2 border rounded" />
+        </div>
+        {/* Items Section */}
+        <h3 className="text-lg font-semibold mt-4">Conceptos</h3>
+        <div className="flex gap-2 my-2">
+            <input name="description" value={newItem.description} onChange={onItemChange} placeholder="Descripción" className="flex-grow p-2 border rounded"/>
+            <input name="quantity" type="number" value={newItem.quantity} onChange={onItemChange} placeholder="Cant." className="w-20 p-2 border rounded"/>
+            <input name="rate" type="number" value={newItem.rate} onChange={onItemChange} placeholder="Precio" className="w-24 p-2 border rounded"/>
+            <button onClick={addItem} className="bg-gray-200 p-2 rounded">Añadir</button>
+        </div>
+        <div className="space-y-2">
+            {invoiceData.items.map(item => (
+                <div key={item.id} className="flex justify-between items-center bg-gray-100 p-2 rounded">
+                    <span>{item.description}</span>
+                    <button onClick={() => removeItem(item.id)} className="text-red-500">X</button>
+                </div>
+            ))}
+        </div>
+        <div className="text-right font-bold text-xl mt-4">Total: €{invoiceData.amount.toFixed(2)}</div>
+        <div className="flex justify-end gap-4 mt-6">
+          <button onClick={onClose} className="bg-gray-300 px-4 py-2 rounded">Cancelar</button>
+          <button onClick={onSave} className="bg-blue-600 text-white px-4 py-2 rounded">{isEdit ? 'Guardar' : 'Crear'}</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+interface InvoiceDetailModalProps {
+  invoice: Invoice;
+  onClose: () => void;
+  onStatusChange: (id: string, status: Invoice['status']) => void;
+  getStatusColor: (status: Invoice['status']) => string;
+  getStatusText: (status: Invoice['status']) => string;
+}
+
+const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({ invoice, onClose, onStatusChange, getStatusColor, getStatusText }) => (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-50">
+    <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
+      <h2 className="text-xl font-bold mb-4">Factura {invoice.invoiceNumber}</h2>
+      <p><strong>Cliente:</strong> {invoice.clientName}</p>
+      <p><strong>Total:</strong> €{invoice.amount.toFixed(2)}</p>
+      <div className="my-4">
+        <h4 className="font-semibold">Cambiar Estado</h4>
+        <div className="flex gap-2 mt-2">
+          {['Draft', 'Sent', 'Paid', 'Overdue'].map(status => (
+            <button
+              key={status}
+              onClick={() => onStatusChange(invoice.id, status as Invoice['status'])}
+              className={`px-3 py-1 rounded-full text-xs ${invoice.status === status ? getStatusColor(status as any) : 'bg-gray-200'}`}>
+              {getStatusText(status as any)}
+            </button>
+          ))}
+        </div>
+      </div>
+      <button onClick={onClose} className="mt-4 bg-gray-300 px-4 py-2 rounded">Cerrar</button>
+    </div>
+  </div>
+);
 
 export default InvoicesManagement;

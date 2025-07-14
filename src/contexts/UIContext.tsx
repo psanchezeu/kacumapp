@@ -75,6 +75,7 @@ export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
           };
 
           // Cargar preferencias avanzadas si existen
+          // Nota: Los errores 404 son esperados si el backend no tiene implementada esta funcionalidad
           if (user.id) {
             try {
               const response = await api.get(`/api/users/${user.id}/settings`);
@@ -83,8 +84,11 @@ export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
                 userPrefs.accentColor = response.data.accentColor || 'blue';
                 userPrefs.fontSize = response.data.fontSize || 'medium';
               }
-            } catch (error) {
-              console.error('Error loading user settings', error);
+            } catch (error: any) {
+              // Silenciar errores 404 ya que pueden ser esperados
+              if (error?.response?.status !== 404) {
+                console.error('Error loading user settings', error);
+              }
             }
           }
 

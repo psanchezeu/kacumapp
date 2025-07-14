@@ -1,24 +1,23 @@
-import React, { useState } from 'react';
-import { Save, User, Mail, Phone, Building, Calendar, Shield, Edit } from 'lucide-react';
+import { useState } from 'react';
+import { Save, Mail, Phone, Building, Calendar, Shield, Edit } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
+import { User } from '../../../types';
 
-const UserProfile = () => {
-  const { user } = useAuth();
+// Componente Presentacional
+const UserProfileContent: React.FC<{ user: User }> = ({ user }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   
   const [profileData, setProfileData] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
-    company: user?.company || '',
-    phone: user?.phone || '',
-    avatar: user?.avatar || '',
-    // Additional fields
+    name: user.name || '',
+    email: user.email || '',
+    company: user.company || '', 
+    phone: user.phone || '',     
+    avatar: user.avatarUrl || '', 
     position: 'CEO',
-    website: 'https://empresa.com',
+    website: 'https://kacum.com',
     address: 'Calle Principal 123, Madrid',
     bio: 'Emprendedor apasionado por la tecnología y la innovación.',
-    // Preferences
     emailNotifications: true,
     projectUpdates: true,
     invoiceReminders: true,
@@ -33,9 +32,10 @@ const UserProfile = () => {
 
   const [showPasswordForm, setShowPasswordForm] = useState(false);
 
+  const memberSinceDate = new Date(user.createdAt).toLocaleDateString();
+
   const handleSave = async () => {
     setIsSaving(true);
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     setIsSaving(false);
     setIsEditing(false);
@@ -49,7 +49,6 @@ const UserProfile = () => {
     }
     
     setIsSaving(true);
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     setIsSaving(false);
     setShowPasswordForm(false);
@@ -137,7 +136,7 @@ const UserProfile = () => {
             </div>
             <div className="flex items-center space-x-3 text-gray-600">
               <Calendar className="w-4 h-4" />
-              <span className="text-sm">Miembro desde {new Date(user?.createdAt || '').toLocaleDateString()}</span>
+              <span className="text-sm">Miembro desde {memberSinceDate}</span>
             </div>
           </div>
 
@@ -391,6 +390,17 @@ const UserProfile = () => {
       </div>
     </div>
   );
+};
+
+// Componente Contenedor
+const UserProfile = () => {
+  const { user } = useAuth();
+
+  if (!user) {
+    return <div className="p-6">Cargando perfil...</div>;
+  }
+
+  return <UserProfileContent user={user} />;
 };
 
 export default UserProfile;
